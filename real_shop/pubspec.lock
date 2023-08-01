@@ -129,6 +129,54 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  firebase_auth:
+    dependency: "direct main"
+    description:
+      name: firebase_auth
+      sha256: b5744892ac6d5d7e2a9f463e192aad9323cf8bd72ba6ef1cd811d8948519e244
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.1"
+  firebase_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_auth_platform_interface
+      sha256: "4dfd37e9c3478d0eac8e57acc492bf323b6ce656903e902a5920fd74adcc43ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
+  firebase_auth_web:
+    dependency: transitive
+    description:
+      name: firebase_auth_web
+      sha256: "0e43563d638533f60f87c0290e1a4394855b375260aff67158822037ebf74e72"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
+  firebase_core:
+    dependency: transitive
+    description:
+      name: firebase_core
+      sha256: "7682e4156d0f65644fe834b20f332bb0e3207d9349533b6564ca842f3cf8a4fb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.0"
+  firebase_core_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_core_platform_interface
+      sha256: "1d0f788341383aa4d663baa5524e011af6f2ca12a85d20eca4184dff430b5917"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
+  firebase_core_web:
+    dependency: transitive
+    description:
+      name: firebase_core_web
+      sha256: a1469ea3122c4f2274d920f0539754f30e097436d9af3df762727b0a4e55fcf6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+3"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -320,6 +368,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.3"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: e83f7ad1e6375da1400b54eea8793bba804d1731d68c5694490bf9296cd3ca24
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.5"
   shared_preferences:
     dependency: "direct main"
     description:

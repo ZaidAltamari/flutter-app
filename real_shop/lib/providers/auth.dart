@@ -33,6 +33,7 @@ class Auth with ChangeNotifier {
       String email, String password, String urlSegment) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
+
     try {
       final res = await http.post(
         url,
@@ -72,6 +73,8 @@ class Auth with ChangeNotifier {
 
   Future<void> signUp(String email, String password) async {
     await _authenticate(email, password, 'signUp');
+    await sendEmailVerification();
+    // await deleteUser();
   }
 
   Future<void> sendEmailVerification() async {
@@ -83,6 +86,30 @@ class Auth with ChangeNotifier {
         body: json.encode(
           {
             'requestType': 'VERIFY_EMAIL',
+            'idToken': _token,
+          },
+        ),
+      );
+      final responseData = json.decode(res.body);
+      print(responseData); // After final responseData = json.decode(res.body);
+
+      if (responseData['error'] != null) {
+        throw HttpException(responseData['error']['message']);
+      }
+    } catch (e) {
+      print(e.toString());
+      throw e;
+    }
+  }
+
+  Future<void> deleteUser() async {
+    final url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
+    try {
+      final res = await http.post(
+        url,
+        body: json.encode(
+          {
             'idToken': _token,
           },
         ),

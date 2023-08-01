@@ -94,10 +94,13 @@ class _AuthCardState extends State<AuthCard>
 
   Animation<Offset> _slideAnimation;
   Animation<double> _opacityAnimation;
+  bool _isMounted = false;
 
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -123,6 +126,7 @@ class _AuthCardState extends State<AuthCard>
   @override
   void dispose() {
     _controller.dispose();
+    _isMounted = false;
 
     super.dispose();
   }
@@ -143,16 +147,17 @@ class _AuthCardState extends State<AuthCard>
         await Provider.of<Auth>(context, listen: false)
             .login(_authData['email'], _authData['password']);
       } else {
-        await Provider.of<Auth>(context, listen: false).sendEmailVerification();
+        print("zaid");
+        // Provider.of<Auth>(context, listen: false).sendEmailVerification();
         // Check if the email is verified
-        User user = FirebaseAuth.instance.currentUser;
-        if (user != null && user.emailVerified) {
-          await Provider.of<Auth>(context, listen: false)
-              .signUp(_authData['email'], _authData['password']);
-        } else {
-          // Show some message to tell user to verify email first
-          _showErrorDialog('Please verify your email before signing up.');
-        }
+        // User user = FirebaseAuth.instance.currentUser;
+        // if (user != null && user.emailVerified) {
+        await Provider.of<Auth>(context, listen: false)
+            .signUp(_authData['email'], _authData['password']);
+        // } else {
+        //   // Show some message to tell user to verify email first
+        //   _showErrorDialog('Please verify your email before signing up.');
+        // }
       }
     } on HttpException catch (error) {
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -175,9 +180,11 @@ class _AuthCardState extends State<AuthCard>
       _showErrorDialog(errorMessage);
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    if (_isMounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _switchAuthMode() {

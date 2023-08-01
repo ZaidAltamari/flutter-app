@@ -72,10 +72,9 @@ class Auth with ChangeNotifier {
 
   Future<void> signUp(String email, String password) async {
     await _authenticate(email, password, 'signUp');
-    _sendEmailVerification();
   }
 
-  Future<void> _sendEmailVerification() async {
+  Future<void> sendEmailVerification() async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
     try {

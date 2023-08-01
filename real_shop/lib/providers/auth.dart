@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
+import '../screens/product_detail_screen.dart';
 
 class Auth with ChangeNotifier {
   String _token;
@@ -29,8 +30,8 @@ class Auth with ChangeNotifier {
     return _userId;
   }
 
-  Future<void> _authenticate(
-      String email, String password, String urlSegment) async {
+  Future<void> _authenticate(String email, String password, String urlSegment,
+      BuildContext context) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
 
@@ -57,6 +58,24 @@ class Auth with ChangeNotifier {
           seconds: int.parse(
         responseData['expiresIn'],
       )));
+      // sendEmailVerification();
+      await sendEmailVerification();
+      bool isVerified = await sendEmailVerification();
+      if (isVerified) {
+        // navigate to home page
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => ProductDetailScreen()));
+      } else {
+        // show error message
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text("Email verification failed"),
+          ),
+        );
+      }
+
       _autoLogout();
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
@@ -73,11 +92,10 @@ class Auth with ChangeNotifier {
 
   Future<void> signUp(String email, String password) async {
     await _authenticate(email, password, 'signUp');
-    await sendEmailVerification();
-    // await deleteUser();
+    // check for email verification
   }
 
-  Future<void> sendEmailVerification() async {
+  Future<bool> sendEmailVerification() async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
     try {
@@ -91,14 +109,16 @@ class Auth with ChangeNotifier {
         ),
       );
       final responseData = json.decode(res.body);
-      print(responseData); // After final responseData = json.decode(res.body);
-
       if (responseData['error'] != null) {
         throw HttpException(responseData['error']['message']);
       }
+
+      // If there was no error, return true
+      return true;
     } catch (e) {
       print(e.toString());
-      throw e;
+      // If there was an error, return false
+      return false;
     }
   }
 

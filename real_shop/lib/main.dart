@@ -13,6 +13,7 @@ import './screens/product_overview_screen.dart';
 import './screens/splash_screen.dart';
 import './screens/user_products_screen.dart';
 import './screens/auth_screen.dart';
+import './screens/verify.dart';
 
 void main() => runApp(MyApp());
 
@@ -50,12 +51,16 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
-          home: auth.isAuth
-              ? ProductOverviewScreen()
+          home: auth?.isAuth ?? false
+              ? (auth?.token != null
+                  ? (auth?.isEmailVerified == false
+                      ? ProductOverviewScreen()
+                      : VerificationScreen())
+                  : ProductOverviewScreen())
               : FutureBuilder(
-                  future: auth.tryAutoLogin(),
+                  future: auth?.tryAutoLogin(),
                   builder: (ctx, AsyncSnapshot authSnapshot) =>
-                      authSnapshot.connectionState == ConnectionState.waiting
+                      authSnapshot?.connectionState == ConnectionState.waiting
                           ? SplashScreen()
                           : AuthScreen(),
                 ),

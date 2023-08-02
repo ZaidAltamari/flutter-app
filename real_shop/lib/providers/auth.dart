@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
+import '../screens/verify.dart';
 
 class Auth with ChangeNotifier {
   String _token;
@@ -15,6 +16,10 @@ class Auth with ChangeNotifier {
   bool get isAuth {
     return token != null;
   }
+
+  // bool get isEmailVerified {
+  //   return true;
+  // }
 
   String get token {
     if (_expiryDate != null &&
@@ -71,9 +76,15 @@ class Auth with ChangeNotifier {
     }
   }
 
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp(String email, String password, context) async {
     await _authenticate(email, password, 'signUp');
     await sendEmailVerification();
+
+    // Navigate to verification screen
+    Navigator.of(context).pushReplacementNamed(VerificationScreen.routeName);
+
+    return null;
+    // await sendEmailVerification();
     // await deleteUser();
   }
 
@@ -99,6 +110,35 @@ class Auth with ChangeNotifier {
     } catch (e) {
       print(e.toString());
       throw e;
+    }
+  }
+
+  bool _emailVerified = false;
+
+  bool get isEmailVerified {
+    return _emailVerified;
+  }
+
+// This method should be called any time you want to check if the email has been verified
+  Future<void> fetchEmailVerificationStatus() async {
+    final url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
+
+    final response = await http.post(
+      url,
+      body: json.encode({
+        'idToken': _token,
+      }),
+    );
+
+    final responseData = json.decode(response.body);
+    if (responseData['users'] != null) {
+      final user = responseData['users'][0];
+      _emailVerified = user['emailVerified'];
+      notifyListeners(); // to rebuild widgets using this provider
+    } else {
+      _emailVerified = false;
+      notifyListeners(); // to rebuild widgets using this provider
     }
   }
 

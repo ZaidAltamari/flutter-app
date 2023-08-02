@@ -52,10 +52,8 @@ class MyApp extends StatelessWidget {
             fontFamily: 'Lato',
           ),
           home: auth?.isAuth ?? false
-              ? (auth?.token != null
-                  ? (auth?.isEmailVerified == false
-                      ? ProductOverviewScreen()
-                      : VerificationScreen())
+              ? (auth?.isEmailVerified == false
+                  ? VerificationScreen()
                   : ProductOverviewScreen())
               : FutureBuilder(
                   future: auth?.tryAutoLogin(),

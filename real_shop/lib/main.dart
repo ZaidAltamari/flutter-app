@@ -51,14 +51,16 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
-          home: auth?.isAuth ?? false
-              ? (auth?.isEmailVerified == false
+          home: auth != null && auth.isAuth
+              ? (auth.isEmailVerified == false
                   ? VerificationScreen()
                   : ProductOverviewScreen())
               : FutureBuilder(
                   future: auth?.tryAutoLogin(),
                   builder: (ctx, AsyncSnapshot authSnapshot) =>
-                      authSnapshot?.connectionState == ConnectionState.waiting
+                      authSnapshot != null &&
+                              authSnapshot.connectionState ==
+                                  ConnectionState.waiting
                           ? SplashScreen()
                           : AuthScreen(),
                 ),

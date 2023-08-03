@@ -22,22 +22,31 @@ class ProductOverviewScreen extends StatefulWidget {
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _isLoading = false;
   var _showOnlyFavorites = false;
+  var _isProductLoading = false;
+
+  void fetchAndSetProducts() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Provider.of<Products>(context, listen: false)
+        .fetchAndSetProducts()
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+        _isProductLoading = true;
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    fetchAndSetProducts();
+  }
 
-    setState(() {
-      _isLoading = true;
-    });
-    Provider.of<Products>(context, listen: false)
-        .fetchAndSetProducts()
-        .then(
-          (_) => setState(
-            () => _isLoading = false,
-          ),
-        )
-        .catchError((error) => setState(() => _isLoading = false));
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -78,10 +87,20 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
           ),
         )
       ]),
-      body: _isLoading
+      body: _isLoading == true
           ? Center(child: CircularProgressIndicator())
-          : ProductsGrid(_showOnlyFavorites),
+          : _isProductLoading
+              ? ProductsGrid(_showOnlyFavorites)
+              : Center(child: Text("Loading...")),
+      // body: Center(child: CircularProgressIndicator()),
+
       drawer: AppDrawer(),
     );
   }
+
+  // void setState() {
+  //   if (mounted) {
+  //     super.setState();
+  //   }
+  // }
 }

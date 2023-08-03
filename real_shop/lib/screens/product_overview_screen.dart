@@ -23,14 +23,18 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _isLoading = false;
   var _showOnlyFavorites = false;
   var _isProductLoading = false;
+  var _isDisposed = false;
 
   void fetchAndSetProducts() async {
+    if (_isDisposed) return;
     setState(() {
       _isLoading = true;
     });
     await Provider.of<Products>(context, listen: false)
         .fetchAndSetProducts()
         .then((_) {
+      if (_isDisposed) return;
+
       setState(() {
         _isLoading = false;
         _isProductLoading = true;
@@ -47,6 +51,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   @override
   void dispose() {
     super.dispose();
+    _isDisposed = true;
   }
 
   @override

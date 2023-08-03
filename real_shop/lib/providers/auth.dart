@@ -17,6 +17,11 @@ class Auth with ChangeNotifier {
     return token != null;
   }
 
+  void _setEmailVerified(bool value) {
+    _emailVerified = value;
+    notifyListeners();
+  }
+
   // bool get isEmailVerified {
   //   return true;
   // }
@@ -72,6 +77,7 @@ class Auth with ChangeNotifier {
       });
       prefs.setString('userData', userData);
     } catch (e) {
+      print("zah zah");
       throw e;
     }
   }
@@ -81,11 +87,11 @@ class Auth with ChangeNotifier {
     await sendEmailVerification();
 
     // Navigate to verification screen
-    Navigator.of(context).pushReplacementNamed(VerificationScreen.routeName);
-
-    return null;
-    // await sendEmailVerification();
-    // await deleteUser();
+    await Navigator.of(context)
+        .pushReplacementNamed(VerificationScreen.routeName);
+    if (isEmailVerified) {
+      return _setEmailVerified(true);
+    }
   }
 
   Future<void> sendEmailVerification() async {
@@ -108,7 +114,7 @@ class Auth with ChangeNotifier {
         throw HttpException(responseData['error']['message']);
       }
     } catch (e) {
-      print(e.toString());
+      print("allah allah");
       throw e;
     }
   }

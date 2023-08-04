@@ -1,6 +1,3 @@
-// import 'package:flutter/cupertino.dart';
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_shop/screens/product_overview_screen.dart';
@@ -8,8 +5,7 @@ import 'package:real_shop/screens/product_overview_screen.dart';
 import '../providers/auth.dart';
 
 class VerificationScreen extends StatelessWidget {
-  // static const routeName = '/verify-email';
-  static const routeName = '/verification';
+  static const routeName = '/verify-email';
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +23,17 @@ class VerificationScreen extends StatelessWidget {
               onPressed: () async {
                 await Provider.of<Auth>(context, listen: false)
                     .fetchEmailVerificationStatus();
+
                 if (Provider.of<Auth>(context, listen: false).isEmailVerified) {
-                  Navigator.of(context)
-                      .pushReplacementNamed(ProductOverviewScreen.routeName);
+                  Navigator.of(context).pushReplacementNamed(
+                    ProductOverviewScreen.routeName,
+                  );
                 } else {
-                  // Show a message to the user that email verification is not complete.
-                  // This could be a dialog, a Snackbar, or any other way you'd prefer.
-                  print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please complete email verification.'),
+                    ),
+                  );
                 }
               },
             ),

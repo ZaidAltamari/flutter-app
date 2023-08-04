@@ -1,5 +1,6 @@
 import "dart:convert";
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
@@ -21,10 +22,6 @@ class Auth with ChangeNotifier {
     _emailVerified = value;
     notifyListeners();
   }
-
-  // bool get isEmailVerified {
-  //   return true;
-  // }
 
   String get token {
     if (_expiryDate != null &&
@@ -89,6 +86,7 @@ class Auth with ChangeNotifier {
     // Navigate to verification screen
     await Navigator.of(context)
         .pushReplacementNamed(VerificationScreen.routeName);
+    await fetchEmailVerificationStatus();
     if (isEmailVerified) {
       return _setEmailVerified(true);
     }

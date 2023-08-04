@@ -144,8 +144,6 @@ class _AuthCardState extends State<AuthCard>
         await Provider.of<Auth>(context, listen: false)
             .login(_authData['email'], _authData['password']);
       } else {
-        print("zaid");
-
         await Provider.of<Auth>(context, listen: false)
             .signUp(_authData['email'], _authData['password'], context);
       }

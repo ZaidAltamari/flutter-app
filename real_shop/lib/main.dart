@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_shop/screens/test.dart';
@@ -19,6 +20,8 @@ import './screens/verify.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  // final auth = FirebaseAuth.instance;
+  // final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -53,8 +56,8 @@ class MyApp extends StatelessWidget {
             fontFamily: 'Lato',
           ),
           home: auth != null && auth.isAuth
-              ? (auth.isEmailVerified == false
-                  ? VerificationScreen()
+              ? (auth.isEmailVerified == false || auth.isEmailVerified == null
+                  ? ProductOverviewScreen()
                   : ProductOverviewScreen())
               : FutureBuilder(
                   future: auth?.tryAutoLogin(),

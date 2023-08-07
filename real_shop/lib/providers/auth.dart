@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
+import '../screens/product_overview_screen.dart';
 import '../screens/verify.dart';
 
 class Auth with ChangeNotifier {
@@ -17,6 +18,10 @@ class Auth with ChangeNotifier {
   bool get isAuth {
     return token != null;
   }
+
+  // String get userId2 {
+  //   return _userId;
+  // }
 
   void _setEmailVerified(bool value) {
     _emailVerified = value;
@@ -56,7 +61,6 @@ class Auth with ChangeNotifier {
       if (responseData['error'] != null) {
         // throw HttpException(responseData['error']['message']);
         return throw HttpException(responseData['error']['message']);
-        // print(HttpException(responseData['error']['message']));
       }
       _token = responseData['idToken'];
       _userId = responseData['localId'];
@@ -79,16 +83,29 @@ class Auth with ChangeNotifier {
     }
   }
 
-  Future<void> signUp(String email, String password, context) async {
-    await _authenticate(email, password, 'signUp');
-    await sendEmailVerification();
+  Future<void> signUp(
+      String email, String password, BuildContext context) async {
+    try {
+      // Authenticate the user
+      await _authenticate(email, password, 'signUp');
 
-    // Navigate to verification screen
-    await Navigator.of(context)
-        .pushReplacementNamed(VerificationScreen.routeName);
-    await fetchEmailVerificationStatus();
-    if (isEmailVerified) {
-      return _setEmailVerified(true);
+      // Send the email verification
+      await sendEmailVerification();
+
+      // Fetch the latest email verification status
+      await fetchEmailVerificationStatus();
+
+      // Now navigate to the appropriate screen based on the fetched status
+      if (isEmailVerified) {
+        Navigator.of(context)
+            .pushReplacementNamed(ProductOverviewScreen.routeName);
+      } else {
+        Navigator.of(context)
+            .pushReplacementNamed(VerificationScreen.routeName);
+      }
+    } catch (error) {
+      // Handle any errors during sign up
+      print(error);
     }
   }
 
@@ -123,7 +140,6 @@ class Auth with ChangeNotifier {
     return _emailVerified;
   }
 
-// This method should be called any time you want to check if the email has been verified
   Future<void> fetchEmailVerificationStatus() async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
@@ -136,12 +152,15 @@ class Auth with ChangeNotifier {
     );
 
     final responseData = json.decode(response.body);
+    // Add print statements before and after the assignment of _emailVerified
     if (responseData['users'] != null) {
       final user = responseData['users'][0];
       _emailVerified = user['emailVerified'];
+      print('_emailVerified: $_emailVerified');
       notifyListeners(); // to rebuild widgets using this provider
     } else {
       _emailVerified = false;
+      print('_emailVerified: $_emailVerified');
       notifyListeners(); // to rebuild widgets using this provider
     }
   }
@@ -167,8 +186,17 @@ class Auth with ChangeNotifier {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    return _authenticate(email, password, 'signInWithPassword');
+  Future<void> login(String email, String password, context) async {
+    await _authenticate(email, password, 'signInWithPassword');
+    await fetchEmailVerificationStatus();
+
+    if (!_emailVerified) {
+      return await Navigator.of(context)
+          .pushReplacementNamed(VerificationScreen.routeName);
+    } else {
+      return await Navigator.of(context)
+          .pushReplacementNamed(ProductOverviewScreen.routeName);
+    }
   }
 
   Future<bool> tryAutoLogin() async {
@@ -198,6 +226,7 @@ class Auth with ChangeNotifier {
       _authTimer.cancel();
       _authTimer = null;
     }
+
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();

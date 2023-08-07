@@ -57,16 +57,18 @@ class MyApp extends StatelessWidget {
           ),
           home: auth != null && auth.isAuth
               ? (auth.isEmailVerified == false || auth.isEmailVerified == null
-                  ? ProductOverviewScreen()
+                  ? VerificationScreen()
                   : ProductOverviewScreen())
               : FutureBuilder(
                   future: auth?.tryAutoLogin(),
-                  builder: (ctx, AsyncSnapshot authSnapshot) =>
-                      authSnapshot != null &&
-                              authSnapshot.connectionState ==
-                                  ConnectionState.waiting
-                          ? SplashScreen()
-                          : AuthScreen(),
+                  builder: (ctx, AsyncSnapshot authSnapshot) {
+                    if (authSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return SplashScreen();
+                    } else {
+                      return AuthScreen();
+                    }
+                  },
                 ),
           routes: {
             ProductDetailScreen.routeName: (_) => ProductDetailScreen(),

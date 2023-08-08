@@ -83,24 +83,44 @@ class Auth with ChangeNotifier {
     }
   }
 
+  // Future<void> signUp(String email, String password, context) async {
+  //   // Authenticate the user
+  //   await _authenticate(email, password, 'signUp');
+
+  //   // Send the email verification
+  //   await sendEmailVerification();
+
+  //   // Fetch the latest email verification status
+  //   await fetchEmailVerificationStatus();
+
+  //   // Now navigate to the appropriate screen based on the fetched status
+  //   if (isEmailVerified) {
+  //     await Navigator.of(context)
+  //         .pushReplacementNamed(ProductOverviewScreen.routeName);
+  //   } else {
+  //     await Navigator.of(context)
+  //         .pushReplacementNamed(VerificationScreen.routeName);
+  //   }
+  // }
   Future<void> signUp(String email, String password, context) async {
-    // Authenticate the user
-    await _authenticate(email, password, 'signUp');
-
-    // Send the email verification
-    await sendEmailVerification();
-
-    // Fetch the latest email verification status
-    await fetchEmailVerificationStatus();
-
-    // Now navigate to the appropriate screen based on the fetched status
-    if (isEmailVerified) {
-      await Navigator.of(context)
-          .pushReplacementNamed(ProductOverviewScreen.routeName);
-    } else {
-      await Navigator.of(context)
-          .pushReplacementNamed(VerificationScreen.routeName);
+    if (!isAuth) {
+      // Authenticate the user
+      await _authenticate(email, password, 'signUp');
+      _setEmailVerified(false);
+      // Send the email verification
+      await sendEmailVerification();
+      // Fetch the latest email verification status
+      await fetchEmailVerificationStatus();
+      // Now navigate to the appropriate screen based on the fetched status
+      if (isEmailVerified) {
+        await Navigator.of(context)
+            .pushReplacementNamed(ProductOverviewScreen.routeName);
+      } else {
+        await Navigator.of(context)
+            .pushReplacementNamed(VerificationScreen.routeName);
+      }
     }
+    return null;
   }
 
   Future<void> sendEmailVerification() async {
@@ -216,6 +236,7 @@ class Auth with ChangeNotifier {
     _token = null;
     _userId = null;
     _expiryDate = null;
+    _emailVerified = false;
     if (_authTimer != null) {
       _authTimer.cancel();
       _authTimer = null;
@@ -223,7 +244,7 @@ class Auth with ChangeNotifier {
 
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    prefs.clear();
+    await prefs.clear();
   }
 
   void _autoLogout() {

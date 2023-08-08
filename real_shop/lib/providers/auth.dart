@@ -84,27 +84,23 @@ class Auth with ChangeNotifier {
   }
 
   Future<void> signUp(String email, String password, context) async {
-    if (!isAuth) {
-      // Authenticate the user
-      await _authenticate(email, password, 'signUp');
-      _setEmailVerified(false);
+    // Authenticate the user
+    await _authenticate(email, password, 'signUp');
 
-      // Send the email verification
-      await sendEmailVerification();
+    // Send the email verification
+    await sendEmailVerification();
 
-      // Fetch the latest email verification status
-      await fetchEmailVerificationStatus();
+    // Fetch the latest email verification status
+    await fetchEmailVerificationStatus();
 
-      // Now navigate to the appropriate screen based on the fetched status
-      if (isEmailVerified) {
-        await Navigator.of(context)
-            .pushReplacementNamed(ProductOverviewScreen.routeName);
-      } else {
-        await Navigator.of(context)
-            .pushReplacementNamed(VerificationScreen.routeName);
-      }
+    // Now navigate to the appropriate screen based on the fetched status
+    if (isEmailVerified) {
+      await Navigator.of(context)
+          .pushReplacementNamed(ProductOverviewScreen.routeName);
+    } else {
+      await Navigator.of(context)
+          .pushReplacementNamed(VerificationScreen.routeName);
     }
-    return null;
   }
 
   Future<void> sendEmailVerification() async {
@@ -220,8 +216,6 @@ class Auth with ChangeNotifier {
     _token = null;
     _userId = null;
     _expiryDate = null;
-    _emailVerified = false;
-
     if (_authTimer != null) {
       _authTimer.cancel();
       _authTimer = null;
@@ -229,7 +223,7 @@ class Auth with ChangeNotifier {
 
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    prefs.clear();
   }
 
   void _autoLogout() {

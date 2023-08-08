@@ -55,6 +55,21 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
+          home: auth != null && auth.isAuth
+              ? (auth.isEmailVerified == false || auth.isEmailVerified == null
+                  ? VerificationScreen()
+                  : ProductOverviewScreen())
+              : FutureBuilder(
+                  future: auth?.tryAutoLogin(),
+                  builder: (ctx, AsyncSnapshot authSnapshot) {
+                    if (authSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return SplashScreen();
+                    } else {
+                      return AuthScreen();
+                    }
+                  },
+                ),
           routes: {
             ProductDetailScreen.routeName: (_) => ProductDetailScreen(),
             CartScreen.routeName: (_) => CartScreen(),

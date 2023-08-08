@@ -1,13 +1,10 @@
 import "dart:convert";
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
-import '../screens/product_overview_screen.dart';
-import '../screens/verify.dart';
 
 class Auth with ChangeNotifier {
   String _token;
@@ -17,15 +14,6 @@ class Auth with ChangeNotifier {
 
   bool get isAuth {
     return token != null;
-  }
-
-  // String get userId2 {
-  //   return _userId;
-  // }
-
-  void _setEmailVerified(bool value) {
-    _emailVerified = value;
-    notifyListeners();
   }
 
   String get token {
@@ -45,7 +33,6 @@ class Auth with ChangeNotifier {
       String email, String password, String urlSegment) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
-
     try {
       final res = await http.post(
         url,
@@ -61,6 +48,7 @@ class Auth with ChangeNotifier {
       if (responseData['error'] != null) {
         // throw HttpException(responseData['error']['message']);
         return throw HttpException(responseData['error']['message']);
+        // print(HttpException(responseData['error']['message']));
       }
       _token = responseData['idToken'];
       _userId = responseData['localId'];
@@ -78,139 +66,16 @@ class Auth with ChangeNotifier {
       });
       prefs.setString('userData', userData);
     } catch (e) {
-      print("zah zah");
       throw e;
     }
   }
 
-  // Future<void> signUp(String email, String password, context) async {
-  //   // Authenticate the user
-  //   await _authenticate(email, password, 'signUp');
-
-  //   // Send the email verification
-  //   await sendEmailVerification();
-
-  //   // Fetch the latest email verification status
-  //   await fetchEmailVerificationStatus();
-
-  //   // Now navigate to the appropriate screen based on the fetched status
-  //   if (isEmailVerified) {
-  //     await Navigator.of(context)
-  //         .pushReplacementNamed(ProductOverviewScreen.routeName);
-  //   } else {
-  //     await Navigator.of(context)
-  //         .pushReplacementNamed(VerificationScreen.routeName);
-  //   }
-  // }
-  Future<void> signUp(String email, String password, context) async {
-    if (!isAuth) {
-      // Authenticate the user
-      await _authenticate(email, password, 'signUp');
-      _setEmailVerified(false);
-      // Send the email verification
-      await sendEmailVerification();
-      // Fetch the latest email verification status
-      await fetchEmailVerificationStatus();
-      // Now navigate to the appropriate screen based on the fetched status
-      if (isEmailVerified) {
-        await Navigator.of(context)
-            .pushReplacementNamed(ProductOverviewScreen.routeName);
-      } else {
-        await Navigator.of(context)
-            .pushReplacementNamed(VerificationScreen.routeName);
-      }
-    }
-    return null;
+  Future<void> signUp(String email, String password) async {
+    return _authenticate(email, password, 'signUp');
   }
 
-  Future<void> sendEmailVerification() async {
-    final url =
-        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
-    try {
-      final res = await http.post(
-        url,
-        body: json.encode(
-          {
-            'requestType': 'VERIFY_EMAIL',
-            'idToken': _token,
-          },
-        ),
-      );
-      final responseData = json.decode(res.body);
-      print(responseData); // After final responseData = json.decode(res.body);
-
-      if (responseData['error'] != null) {
-        throw HttpException(responseData['error']['message']);
-      }
-    } catch (e) {
-      print("allah allah");
-      throw e;
-    }
-  }
-
-  bool _emailVerified = false;
-
-  bool get isEmailVerified {
-    return _emailVerified;
-  }
-
-  Future<void> fetchEmailVerificationStatus() async {
-    final url =
-        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
-
-    final response = await http.post(
-      url,
-      body: json.encode({
-        'idToken': _token,
-      }),
-    );
-
-    final responseData = json.decode(response.body);
-    // Add print statements before and after the assignment of _emailVerified
-    if (responseData['users'] != null) {
-      final user = responseData['users'][0];
-      _emailVerified = user['emailVerified'];
-      print('_emailVerified: $_emailVerified');
-      notifyListeners(); // to rebuild widgets using this provider
-    } else {
-      _emailVerified = false;
-      print('_emailVerified: $_emailVerified');
-      notifyListeners(); // to rebuild widgets using this provider
-    }
-  }
-
-  Future<void> deleteUser() async {
-    final url =
-        'https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyAgxjGMH8T9Ltgb8xGpxUi84xVC0h5jEd4';
-    try {
-      final res = await http.post(
-        url,
-        body: json.encode(
-          {
-            'idToken': _token,
-          },
-        ),
-      );
-      final responseData = json.decode(res.body);
-      if (responseData['error'] != null) {
-        throw HttpException(responseData['error']['message']);
-      }
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> login(String email, String password, context) async {
-    await _authenticate(email, password, 'signInWithPassword');
-    await fetchEmailVerificationStatus();
-
-    if (!_emailVerified) {
-      return await Navigator.of(context)
-          .pushReplacementNamed(VerificationScreen.routeName);
-    } else {
-      return await Navigator.of(context)
-          .pushReplacementNamed(ProductOverviewScreen.routeName);
-    }
+  Future<void> login(String email, String password) async {
+    return _authenticate(email, password, 'signInWithPassword');
   }
 
   Future<bool> tryAutoLogin() async {
@@ -236,15 +101,13 @@ class Auth with ChangeNotifier {
     _token = null;
     _userId = null;
     _expiryDate = null;
-    _emailVerified = false;
     if (_authTimer != null) {
       _authTimer.cancel();
       _authTimer = null;
     }
-
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    prefs.clear();
   }
 
   void _autoLogout() {

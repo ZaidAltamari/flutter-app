@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:real_shop/screens/test.dart';
 
 import './providers/auth.dart';
 import './providers/cart.dart';
@@ -13,10 +15,13 @@ import './screens/product_overview_screen.dart';
 import './screens/splash_screen.dart';
 import './screens/user_products_screen.dart';
 import './screens/auth_screen.dart';
+import './screens/verify.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  // final auth = FirebaseAuth.instance;
+  // final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -50,14 +55,20 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
-          home: auth.isAuth
-              ? ProductOverviewScreen()
+          home: auth != null && auth.isAuth
+              ? (auth.isEmailVerified == false || auth.isEmailVerified == null
+                  ? VerificationScreen()
+                  : ProductOverviewScreen())
               : FutureBuilder(
-                  future: auth.tryAutoLogin(),
-                  builder: (ctx, AsyncSnapshot authSnapshot) =>
-                      authSnapshot.connectionState == ConnectionState.waiting
-                          ? SplashScreen()
-                          : AuthScreen(),
+                  future: auth?.tryAutoLogin(),
+                  builder: (ctx, AsyncSnapshot authSnapshot) {
+                    if (authSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return SplashScreen();
+                    } else {
+                      return AuthScreen();
+                    }
+                  },
                 ),
           routes: {
             ProductDetailScreen.routeName: (_) => ProductDetailScreen(),

@@ -2,7 +2,10 @@ import "dart:io";
 import "dart:math";
 
 import "package:flutter/material.dart";
+// import "package:provider/provider.dart";
+// import 'package:firebase_auth/firebase_auth.dart';
 import "package:provider/provider.dart";
+import 'package:firebase_auth/firebase_auth.dart';
 
 import "../providers/auth.dart";
 
@@ -91,10 +94,13 @@ class _AuthCardState extends State<AuthCard>
 
   Animation<Offset> _slideAnimation;
   Animation<double> _opacityAnimation;
+  bool _mounted = false;
 
   @override
   void initState() {
     super.initState();
+    _mounted = true;
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -118,10 +124,8 @@ class _AuthCardState extends State<AuthCard>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-
-    super.dispose();
+  void deactivate() {
+    super.deactivate();
   }
 
   var errorMessage = 'Authentication failed';
@@ -138,10 +142,10 @@ class _AuthCardState extends State<AuthCard>
     try {
       if (_authMode == AuthMode.Login) {
         await Provider.of<Auth>(context, listen: false)
-            .login(_authData['email'], _authData['password']);
+            .login(_authData['email'], _authData['password'], context);
       } else {
         await Provider.of<Auth>(context, listen: false)
-            .signUp(_authData['email'], _authData['password']);
+            .signUp(_authData['email'], _authData['password'], context);
       }
     } on HttpException catch (error) {
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -159,12 +163,15 @@ class _AuthCardState extends State<AuthCard>
     } catch (e) {
       const errorMessage =
           'Could not authenticate you. Please try again later.';
+      print('The error is $e');
       _showErrorDialog(errorMessage);
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _switchAuthMode() {
@@ -300,18 +307,20 @@ class _AuthCardState extends State<AuthCard>
   }
 
   void _showErrorDialog(String errorMessage) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-          title: Text('An Error Occurred!'),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(
-                child: Text('Okay'),
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                }),
-          ]),
-    );
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+            title: Text('An Error Occurred!'),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                  child: Text('Okay'),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  }),
+            ]),
+      );
+    }
   }
 }

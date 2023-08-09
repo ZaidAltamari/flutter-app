@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_shop/screens/test.dart';
@@ -19,6 +20,8 @@ import './screens/verify.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  // final auth = FirebaseAuth.instance;
+  // final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -53,22 +56,19 @@ class MyApp extends StatelessWidget {
             fontFamily: 'Lato',
           ),
           home: auth != null && auth.isAuth
-<<<<<<< HEAD
-              ? (auth.isEmailVerified == false
-                  ? VerificationScreen()
-=======
               ? (auth.isEmailVerified == false || auth.isEmailVerified == null
-                  ? ProductOverviewScreen()
->>>>>>> parent of 2188ff5 (zaza)
+                  ? VerificationScreen()
                   : ProductOverviewScreen())
               : FutureBuilder(
                   future: auth?.tryAutoLogin(),
-                  builder: (ctx, AsyncSnapshot authSnapshot) =>
-                      authSnapshot != null &&
-                              authSnapshot.connectionState ==
-                                  ConnectionState.waiting
-                          ? SplashScreen()
-                          : AuthScreen(),
+                  builder: (ctx, AsyncSnapshot authSnapshot) {
+                    if (authSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return SplashScreen();
+                    } else {
+                      return AuthScreen();
+                    }
+                  },
                 ),
           routes: {
             ProductDetailScreen.routeName: (_) => ProductDetailScreen(),
